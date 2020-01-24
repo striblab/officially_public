@@ -26,6 +26,14 @@ class CFBIntegerField(models.IntegerField):
         END
     """
 
+class CFBNAForeignKeyField(models.ForeignKey):
+    copy_template = """
+        CASE
+            WHEN "%(name)s" = 'NA' THEN NULL
+            ELSE "%(name)s"::INT
+        END
+    """
+
 class CFBNullBooleanField(models.NullBooleanField):
     copy_template = """
         CASE
@@ -34,120 +42,11 @@ class CFBNullBooleanField(models.NullBooleanField):
         END
     """
 
-# 2/5/2015  12:00:00 AM
-class CrossbyReport(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
-    EconomicStatementID = CFBIntegerField()
-    DateStart = CFBDateTimeField()
-    DateEnd = CFBDateTimeField(null=True)
-    AgencyNo = CFBIntegerField()
-    SubAgencyNo = CFBIntegerField()
-    PositionNo = CFBIntegerField()
-    POTitle = models.CharField(max_length=500, blank=True)
-    DateReceived = CFBDateTimeField(null=True)
-    Terminated = models.BooleanField()
-    TerminationDate = CFBDateTimeField(null=True)
-    ReAppoint = models.BooleanField()
-    ReportIn = models.BooleanField()
-    ReportInDate = CFBDateField(null=True)
-    ApptDate = CFBDateField(null=True)
-    TermEndDate = CFBDateField(null=True)
-    PermStatus = models.BooleanField()
-    Replaced = models.BooleanField()
-    POLastReportFiled = CFBDateField(null=True)
-    IsCandidate = models.BooleanField()
-    CandType = models.CharField(max_length=25, blank=True)
-    CandRegistrationNumber = CFBIntegerField(null=True)
-    CandidateDelete = models.BooleanField()
-    MoreThanOneBoard = models.BooleanField()
-    TemporaryPublicOfficial = models.BooleanField()
-    Last_Updated = CFBDateTimeField()
-    Date_Entered = CFBDateTimeField()
-    objects = CopyManager()
-
-
-class EconomicStatement(models.Model):
-    EconomicStatementID = CFBIntegerField(primary_key=True)
-    PubOffNo = CFBIntegerField()
-    OnlineApplicationIDs = models.CharField(max_length=255, blank=True)
-    ScenarioType = models.CharField(max_length=30)
-    StatementYear = CFBIntegerField(db_index=True)
-    DueDate = CFBDateField()
-    OriginalCertDate = CFBDateTimeField(null=True)
-    AmendedDate = CFBDateTimeField(null=True)
-    ProcessedDate = CFBDateTimeField(null=True)
-    PrintedDate = CFBNullBooleanField()
-    ElectronicFiler = models.BooleanField()
-    Date_Entered = CFBDateTimeField()
-    Last_Updated = CFBDateTimeField()
-    objects = CopyManager()
-
-
-class HorseRacingbyReport(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
-    EconomicStatementID = CFBIntegerField()
-    DateStart = CFBDateTimeField()
-    DateEnd = CFBDateTimeField(null=True)
-    InterestDesc = models.TextField()
-    PartialInterest = models.BooleanField()
-    FullInterest = models.BooleanField()
-    Interest = models.TextField()
-    AgencyNo = models.BooleanField()
-    Last_Updated = CFBDateTimeField()
-    Date_Entered = CFBDateTimeField()
-    objects = CopyManager()
-
-
-class Position(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PositionNo = CFBIntegerField()
-    AgencyNo = CFBIntegerField()
-    SubAgencyNo = CFBIntegerField()
-    Title = models.CharField(max_length=150, blank=True)
-    AuthorityNo = CFBIntegerField(null=True)
-    ByPosition = models.BooleanField()
-    ByPositionNo = CFBIntegerField(null=True)
-    ByPositionDesc = models.CharField(max_length=50, blank=True)
-    MayDesignate = models.BooleanField()
-    IsTempTitle = models.BooleanField()
-    Designee_AuthNo = CFBIntegerField(null=True)
-    temp_crossid = CFBIntegerField(null=True)
-    SenateConf = models.BooleanField()
-    NeedsConf = models.CharField(max_length=50, blank=True)
-    Statutcite = models.CharField(max_length=50, blank=True)
-    Reporting_Cite = models.CharField(max_length=50, blank=True)
-    Establishment_Cite = models.CharField(max_length=50, blank=True)
-    CountyID = CFBIntegerField(null=True)
-    CandidateDistrict = models.CharField(max_length=5, blank=True)
-    NumberSlots = CFBIntegerField(null=True)
-    UnlimitedSlots = models.BooleanField()
-    bySeat = models.BooleanField()
-    Date_Entered = CFBDateTimeField()
-    Last_Updated = CFBDateTimeField()
-    msrepl_tran_version = models.CharField(max_length=40, blank=True)
-    objects = CopyManager()
-
-
-class Professional_ActivitybyReport(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
-    EconomicStatementID = CFBIntegerField()
-    Professional_Activity = models.CharField(max_length=150, blank=True)
-    Employee = models.BooleanField()
-    Contractor = models.BooleanField()
-    Last_Updated = CFBDateTimeField()
-    Date_Entered = CFBDateTimeField()
-    DateStart = CFBDateTimeField()
-    DateEnd = CFBDateTimeField(null=True)
-    objects = CopyManager()
-
 
 class PublicOfficial(models.Model):
     '''remember to use latin-1'''
     PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
+    PubOffNo = CFBIntegerField(primary_key=True)
     SirName = models.CharField(max_length=10, blank=True)
     POFirstName = models.CharField(max_length=50, blank=True)
     POMI = models.CharField(max_length=5, blank=True)
@@ -191,71 +90,27 @@ class PublicOfficial(models.Model):
     objects = CopyManager()
 
 
-class RealPropertyByReport(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
-    EconomicStatementID = CFBIntegerField()
-    DateStart = CFBDateTimeField()
-    DateEnd = CFBDateTimeField(null=True)
-    Address = models.CharField(max_length=255, blank=True)
-    Municipality = models.CharField(max_length=50, blank=True)
-    County = models.CharField(max_length=75, blank=True)
-    Acreage = models.CharField(max_length=75, blank=True)
-    Fee = models.BooleanField()
-    Mortgage = models.BooleanField()
-    Contract = models.BooleanField()
-    Option2500 = models.BooleanField()
-    Option50000 = models.BooleanField()
-    Last_Updated = CFBDateTimeField()
+class EconomicStatement(models.Model):
+    EconomicStatementID = CFBIntegerField(primary_key=True)
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    OnlineApplicationIDs = models.CharField(max_length=255, blank=True)
+    ScenarioType = models.CharField(max_length=30)
+    StatementYear = CFBIntegerField(db_index=True)
+    DueDate = CFBDateField()
+    OriginalCertDate = CFBDateTimeField(null=True)
+    AmendedDate = CFBDateTimeField(null=True)
+    ProcessedDate = CFBDateTimeField(null=True)
+    PrintedDate = CFBNullBooleanField()
+    ElectronicFiler = models.BooleanField()
     Date_Entered = CFBDateTimeField()
-    AgencyNo = CFBIntegerField(null=True)
-    CandidateDelete = models.BooleanField()
+    Last_Updated = CFBDateTimeField()
     objects = CopyManager()
 
-
-class SecuritiesbyReport(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
-    EconomicStatementID = CFBIntegerField()
-    DateStart = CFBDateTimeField()
-    DateEnd = CFBDateTimeField(null=True)
-    SecurityName = models.CharField(max_length=500, blank=True)
-    SecutritySold = models.BooleanField()
-    AgencyNo = CFBIntegerField(null=True)
-    CandidateDeleteSecurities = models.BooleanField()
-    DeleteRecord = models.BooleanField()
-    Last_Updated = CFBDateTimeField()
-    Date_Entered = CFBDateTimeField()
-    objects = CopyManager()
-
-
-class SourcesbyReport(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PubOffNo = CFBIntegerField()
-    AgencyNo = CFBIntegerField(null=True)
-    EconomicStatementID = CFBIntegerField()
-    SourceName = models.CharField(max_length=255, blank=True)
-    Director = models.BooleanField()
-    Officer = models.BooleanField()
-    Owner = models.BooleanField()
-    Member = models.BooleanField()
-    Partner = models.BooleanField()
-    Employer = models.BooleanField()
-    Employee = models.BooleanField()
-    Honorarium = models.BooleanField()
-    EmployerTerminated = models.BooleanField()
-    CandidateDelete = models.BooleanField()
-    DeleteRecord = models.BooleanField()
-    Last_Updated = CFBDateTimeField()
-    Date_Entered = CFBDateTimeField()
-    DateStart = CFBDateTimeField()
-    DateEnd = CFBDateTimeField(null=True)
-    objects = CopyManager()
 
 
 class Agency(models.Model):
     PrimaryRecID = CFBIntegerField()
-    AgencyNo = CFBIntegerField()
+    AgencyNo = CFBIntegerField(primary_key=True)
     AName = models.CharField(max_length=255, blank=True)
     AAddress = models.CharField(max_length=100, blank=True)
     AStreet = models.CharField(max_length=50, blank=True)
@@ -291,8 +146,8 @@ class Agency(models.Model):
 
 class SubAgency(models.Model):
     PrimaryRecID = CFBIntegerField()
-    AgencyNo = CFBIntegerField()
-    SubAgencyNo = CFBIntegerField()
+    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    SubAgencyNo = CFBIntegerField(primary_key=True)
     SubAgencyName = models.CharField(max_length=100, blank=True)
     SAAddress = models.CharField(max_length=100, blank=True)
     SAStreet = models.CharField(max_length=50, blank=True)
@@ -321,4 +176,158 @@ class SubAgency(models.Model):
     Date_Entered = CFBDateTimeField()
     Last_Updated = CFBDateTimeField()
     msrepl_tran_version = models.CharField(max_length=40, blank=True)
+    objects = CopyManager()
+
+
+class Position(models.Model):
+    PrimaryRecID = CFBIntegerField()
+    PositionNo = CFBIntegerField(primary_key=True)
+    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    SubAgencyNo = models.ForeignKey(SubAgency, on_delete=models.CASCADE)
+    Title = models.CharField(max_length=150, blank=True)
+    AuthorityNo = CFBIntegerField(null=True)
+    ByPosition = models.BooleanField()
+    ByPositionNo = CFBIntegerField(null=True)
+    ByPositionDesc = models.CharField(max_length=50, blank=True)
+    MayDesignate = models.BooleanField()
+    IsTempTitle = models.BooleanField()
+    Designee_AuthNo = CFBIntegerField(null=True)
+    temp_crossid = CFBIntegerField(null=True)
+    SenateConf = models.BooleanField()
+    NeedsConf = models.CharField(max_length=50, blank=True)
+    Statutcite = models.CharField(max_length=50, blank=True)
+    Reporting_Cite = models.CharField(max_length=50, blank=True)
+    Establishment_Cite = models.CharField(max_length=50, blank=True)
+    CountyID = CFBIntegerField(null=True)
+    CandidateDistrict = models.CharField(max_length=5, blank=True)
+    NumberSlots = CFBIntegerField(null=True)
+    UnlimitedSlots = models.BooleanField()
+    bySeat = models.BooleanField()
+    Date_Entered = CFBDateTimeField()
+    Last_Updated = CFBDateTimeField()
+    msrepl_tran_version = models.CharField(max_length=40, blank=True)
+    objects = CopyManager()
+
+
+class HorseRacingbyReport(models.Model):
+    PrimaryRecID = CFBIntegerField()  # No primary key?
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    EconomicStatementID = models.ForeignKey(EconomicStatement, on_delete=models.CASCADE)
+    DateStart = CFBDateTimeField()
+    DateEnd = CFBDateTimeField(null=True)
+    InterestDesc = models.TextField()
+    PartialInterest = models.BooleanField()
+    FullInterest = models.BooleanField()
+    Interest = models.TextField()
+    AgencyNo = CFBNAForeignKeyField(Agency, null=True, on_delete=models.CASCADE)
+    Last_Updated = CFBDateTimeField()
+    Date_Entered = CFBDateTimeField()
+    objects = CopyManager()
+
+
+class Professional_ActivitybyReport(models.Model):
+    PrimaryRecID = CFBIntegerField()  # No primary key?
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    EconomicStatementID = models.ForeignKey(EconomicStatement, on_delete=models.CASCADE)
+    Professional_Activity = models.CharField(max_length=150, blank=True)
+    Employee = models.BooleanField()
+    Contractor = models.BooleanField()
+    Last_Updated = CFBDateTimeField()
+    Date_Entered = CFBDateTimeField()
+    DateStart = CFBDateTimeField()
+    DateEnd = CFBDateTimeField(null=True)
+    objects = CopyManager()
+
+
+class RealPropertyByReport(models.Model):
+    PrimaryRecID = CFBIntegerField()  # No primary key?
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    EconomicStatementID = models.ForeignKey(EconomicStatement, on_delete=models.CASCADE)
+    DateStart = CFBDateTimeField()
+    DateEnd = CFBDateTimeField(null=True)
+    Address = models.CharField(max_length=255, blank=True)
+    Municipality = models.CharField(max_length=50, blank=True)
+    County = models.CharField(max_length=75, blank=True)
+    Acreage = models.CharField(max_length=75, blank=True)
+    Fee = models.BooleanField()
+    Mortgage = models.BooleanField()
+    Contract = models.BooleanField()
+    Option2500 = models.BooleanField()
+    Option50000 = models.BooleanField()
+    Last_Updated = CFBDateTimeField()
+    Date_Entered = CFBDateTimeField()
+    AgencyNo = CFBNAForeignKeyField(Agency, null=True, on_delete=models.CASCADE)
+    CandidateDelete = models.BooleanField()
+    objects = CopyManager()
+
+
+class SecuritiesbyReport(models.Model):
+    PrimaryRecID = CFBIntegerField()  # No primary key?
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    EconomicStatementID = models.ForeignKey(EconomicStatement, on_delete=models.CASCADE)
+    DateStart = CFBDateTimeField()
+    DateEnd = CFBDateTimeField(null=True)
+    SecurityName = models.CharField(max_length=500, blank=True)
+    SecutritySold = models.BooleanField()
+    AgencyNo = CFBNAForeignKeyField(Agency, null=True, on_delete=models.CASCADE)
+    CandidateDeleteSecurities = models.BooleanField()
+    DeleteRecord = models.BooleanField()
+    Last_Updated = CFBDateTimeField()
+    Date_Entered = CFBDateTimeField()
+    objects = CopyManager()
+
+
+class SourcesbyReport(models.Model):
+    PrimaryRecID = CFBIntegerField()   # No primary key?
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    AgencyNo = CFBNAForeignKeyField(Agency, null=True, on_delete=models.CASCADE)
+    EconomicStatementID = models.ForeignKey(EconomicStatement, on_delete=models.CASCADE)
+    SourceName = models.CharField(max_length=255, blank=True)
+    Director = models.BooleanField()
+    Officer = models.BooleanField()
+    Owner = models.BooleanField()
+    Member = models.BooleanField()
+    Partner = models.BooleanField()
+    Employer = models.BooleanField()
+    Employee = models.BooleanField()
+    Honorarium = models.BooleanField()
+    EmployerTerminated = models.BooleanField()
+    CandidateDelete = models.BooleanField()
+    DeleteRecord = models.BooleanField()
+    Last_Updated = CFBDateTimeField()
+    Date_Entered = CFBDateTimeField()
+    DateStart = CFBDateTimeField()
+    DateEnd = CFBDateTimeField(null=True)
+    objects = CopyManager()
+
+
+class CrossbyReport(models.Model):
+    PrimaryRecID = CFBIntegerField()  # No primary key?
+    PubOffNo = models.ForeignKey(PublicOfficial, on_delete=models.CASCADE)
+    EconomicStatementID = models.ForeignKey(EconomicStatement, on_delete=models.CASCADE)
+    DateStart = CFBDateTimeField()
+    DateEnd = CFBDateTimeField(null=True)
+    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    SubAgencyNo = models.ForeignKey(SubAgency, on_delete=models.CASCADE)
+    PositionNo = models.ForeignKey(Position, on_delete=models.CASCADE)
+    POTitle = models.CharField(max_length=500, blank=True)
+    DateReceived = CFBDateTimeField(null=True)
+    Terminated = models.BooleanField()
+    TerminationDate = CFBDateTimeField(null=True)
+    ReAppoint = models.BooleanField()
+    ReportIn = models.BooleanField()
+    ReportInDate = CFBDateField(null=True)
+    ApptDate = CFBDateField(null=True)
+    TermEndDate = CFBDateField(null=True)
+    PermStatus = models.BooleanField()
+    Replaced = models.BooleanField()
+    POLastReportFiled = CFBDateField(null=True)
+    IsCandidate = models.BooleanField()
+    CandType = models.CharField(max_length=25, blank=True)
+    CandRegistrationNumber = CFBIntegerField(null=True)
+    CandidateDelete = models.BooleanField()
+    MoreThanOneBoard = models.BooleanField()
+    TemporaryPublicOfficial = models.BooleanField()
+    Last_Updated = CFBDateTimeField()
+    Date_Entered = CFBDateTimeField()
     objects = CopyManager()

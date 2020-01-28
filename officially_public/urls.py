@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from officials.views import AgencyList, AgencyDetail, PublicOfficialDetail
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('agencies/', AgencyList.as_view()),
+    path('agency/<int:pk>', AgencyDetail.as_view(), name='agency-detail'),
+
+    path('public-official/<int:pk>', PublicOfficialDetail.as_view(), name='official-detail'),
 ]

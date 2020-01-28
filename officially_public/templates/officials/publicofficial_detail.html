@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{object.display_name}}</h1>
+
+    <h2>Positions</h2>
+    <ul>
+    {% for position in object.positions.all %}
+      <li>{{ position.Title }} (<a href="{% url 'agency-detail' position.AgencyNo.pk %}">{{ position.AgencyNo}}</a>)</li>
+    {% endfor %}
+    </ul>
+
+    <h2>Reports</h2>
+    {% for report in object.economicstatement_set.all %}
+    <div class="report">
+      <h3>{{ report.StatementYear }} {{ report.ScenarioType }}</h3>
+      <i>Processed {{ report.ProcessedDate }}</i>
+
+      {% if report.sourcesbyreport_set.all.count > 0 %}
+      <div class="section">
+        <h4>Source of income</h4>
+        <ul>
+        {% for item in report.sourcesbyreport_set.all %}
+          <li>{{ item.SourceName }} ({{ item.which_roles }}) <i>{{ item.DateStart.date}} - {% if item.DateEnd %}{{ item.DateEnd.date }}{% endif %}</i></li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if report.professional_activitybyreport_set.all.count > 0 %}
+      <div class="section">
+        <h4>Professional activities</h4>
+        <ul>
+        {% for item in report.professional_activitybyreport_set.all %}
+          <li>{{ item.Professional_Activity }} ({{ item.which_roles }}) <i>{{ item.DateStart.date}} - {% if item.DateEnd %}{{ item.DateEnd.date }}{% endif %}</i></li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if report.realpropertybyreport_set.all.count > 0 %}
+      <div class="section">
+        <h4>Real property</h4>
+        <ul>
+        {% for item in report.realpropertybyreport_set.all %}
+          <li>{{ item.Address }}, {{ item.Municipality }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if report.securitiesbyreport_set.all.count > 0 %}
+      <div class="section">
+        <h4>Securities</h4>
+        <ul>
+        {% for item in report.securitiesbyreport_set.all %}
+          <li>{{ item.SecurityName }} {{ item.SecurityDescription }}{% if item.SecutritySold %} [SOLD]{% endif %} </li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if report.horseracingbyreport_set.all.count > 0 %}
+      <div class="section">
+        <h4>Horse racing</h4>
+        <ul>
+        {% for item in report.horseracingbyreport_set.all %}
+          <li>{{ item.InterestDesc }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}

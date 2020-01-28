@@ -10,6 +10,7 @@ class CFBDateTimeField(models.DateTimeField):
         END
     """
 
+
 class CFBDateField(models.DateField):
     copy_template = """
         CASE
@@ -17,6 +18,7 @@ class CFBDateField(models.DateField):
             ELSE to_date("%(name)s", 'YYYY-MM-DD')
         END
     """
+
 
 class CFBIntegerField(models.IntegerField):
     copy_template = """
@@ -26,6 +28,7 @@ class CFBIntegerField(models.IntegerField):
         END
     """
 
+
 class CFBNAForeignKeyField(models.ForeignKey):
     copy_template = """
         CASE
@@ -34,6 +37,16 @@ class CFBNAForeignKeyField(models.ForeignKey):
         END
     """
 
+
+class CFBZeroForeignKeyField(models.ForeignKey):
+    copy_template = """
+        CASE
+            WHEN "%(name)s" = '0' THEN NULL
+            ELSE "%(name)s"::INT
+        END
+    """
+
+
 class CFBNullBooleanField(models.NullBooleanField):
     copy_template = """
         CASE
@@ -41,6 +54,128 @@ class CFBNullBooleanField(models.NullBooleanField):
             ELSE "%(name)s"::BOOLEAN
         END
     """
+
+
+class Agency(models.Model):
+    PrimaryRecID = CFBIntegerField()
+    AgencyNo = CFBIntegerField(primary_key=True)
+    AName = models.CharField(max_length=255, blank=True)
+    AAddress = models.CharField(max_length=100, blank=True)
+    AStreet = models.CharField(max_length=50, blank=True)
+    ACity = models.CharField(max_length=50, blank=True)
+    AState = models.CharField(max_length=15, blank=True)
+    AZip = models.CharField(max_length=25, blank=True)
+    AContact = models.CharField(max_length=100, blank=True)
+    ATelephone = models.CharField(max_length=30, blank=True)
+    AEmail = models.CharField(max_length=75, blank=True)
+    AWebsite = models.CharField(max_length=100, blank=True)
+    SenateConf = models.BooleanField()
+    NeedsConf = models.CharField(max_length=50, blank=True)
+    Statutcite = models.CharField(max_length=50, blank=True)
+    Reporting_Cite = models.CharField(max_length=50, blank=True)
+    Establishment_Cite = models.CharField(max_length=50, blank=True)
+    CertifiedDate = CFBDateField(null=True)
+    Abolished = models.BooleanField()
+    AbolishedDate = CFBDateField(null=True)
+    Authority = models.CharField(max_length=100, blank=True)
+    Appointee = models.CharField(max_length=50, blank=True)
+    ADisplayName = models.CharField(max_length=100, blank=True)
+    HasSubAgency = models.BooleanField()
+    AHas_Attachment = models.BooleanField()
+    AAttachment = models.CharField(max_length=255, blank=True)
+    Memo = models.CharField(max_length=255, blank=True)
+    ASend_InterOffice_Mail = models.BooleanField()
+    Date_Entered = CFBDateTimeField()
+    Last_Updated = CFBDateTimeField()
+    msrepl_tran_version = models.CharField(max_length=40, blank=True)
+    bySeat = models.BooleanField()
+    objects = CopyManager()
+
+    class Meta:
+        ordering = ('AName',)
+
+    def __str__(self):
+        return self.AName
+
+
+class SubAgency(models.Model):
+    PrimaryRecID = CFBIntegerField()
+    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    SubAgencyNo = CFBIntegerField(primary_key=True)
+    SubAgencyName = models.CharField(max_length=100, blank=True)
+    SAAddress = models.CharField(max_length=100, blank=True)
+    SAStreet = models.CharField(max_length=50, blank=True)
+    SACity = models.CharField(max_length=50, blank=True)
+    SAState = models.CharField(max_length=15, blank=True)
+    SAZip = models.CharField(max_length=25, blank=True)
+    SAContact = models.CharField(max_length=100, blank=True)
+    SATelephone = models.CharField(max_length=30, blank=True)
+    SAEmail = models.CharField(max_length=75, blank=True)
+    SAWebsite = models.CharField(max_length=100, blank=True)
+    SASenateConf = models.BooleanField()
+    SANeedsConf = CFBNullBooleanField()
+    SAStatutcite = CFBNullBooleanField()
+    SAAbolished = models.BooleanField()
+    SAAbolishedDate = CFBDateField(null=True)
+    SAAuthority = CFBNullBooleanField()
+    SAAppointee = CFBNullBooleanField()
+    Reporting_Cite = models.CharField(max_length=50, blank=True)
+    Establishment_Cite = models.CharField(max_length=50, blank=True)
+    SACertifiedDate = CFBDateField(null=True)
+    SADisplayName = models.CharField(max_length=100, blank=True)
+    SAMemo = models.CharField(max_length=255, blank=True)
+    SAHas_Attachment = models.BooleanField()
+    SAAttachment = models.CharField(max_length=255, blank=True)
+    SASend_InterOffice_Mail = models.BooleanField()
+    Date_Entered = CFBDateTimeField()
+    Last_Updated = CFBDateTimeField()
+    msrepl_tran_version = models.CharField(max_length=40, blank=True)
+    objects = CopyManager()
+
+    class Meta:
+        ordering = ('SubAgencyName',)
+
+
+class PositionType(models.Model):
+    ''' Created by strib to access similar positions in an agency '''
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    subagency = models.ForeignKey(SubAgency, null=True, on_delete=models.CASCADE)
+    title = models.CharField(max_length=150, blank=True)
+
+    class Meta:
+        ordering = ('title',)
+
+
+class Position(models.Model):
+    PrimaryRecID = CFBIntegerField()
+    PositionNo = CFBIntegerField(primary_key=True)
+    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
+    SubAgencyNo = CFBZeroForeignKeyField(SubAgency, null=True, on_delete=models.CASCADE)
+    Title = models.CharField(max_length=150, blank=True)
+    AuthorityNo = CFBIntegerField(null=True)
+    ByPosition = models.BooleanField()
+    ByPositionNo = CFBIntegerField(null=True)
+    ByPositionDesc = models.CharField(max_length=50, blank=True)
+    MayDesignate = models.BooleanField()
+    IsTempTitle = models.BooleanField()
+    Designee_AuthNo = CFBIntegerField(null=True)
+    temp_crossid = CFBIntegerField(null=True)
+    SenateConf = models.BooleanField()
+    NeedsConf = models.CharField(max_length=50, blank=True)
+    Statutcite = models.CharField(max_length=50, blank=True)
+    Reporting_Cite = models.CharField(max_length=50, blank=True)
+    Establishment_Cite = models.CharField(max_length=50, blank=True)
+    CountyID = CFBIntegerField(null=True)
+    CandidateDistrict = models.CharField(max_length=5, blank=True)
+    NumberSlots = CFBIntegerField(null=True)
+    UnlimitedSlots = models.BooleanField()
+    bySeat = models.BooleanField()
+    Date_Entered = CFBDateTimeField()
+    Last_Updated = CFBDateTimeField()
+    msrepl_tran_version = models.CharField(max_length=40, blank=True)
+
+    position_type = models.ForeignKey(PositionType, null=True, on_delete=models.SET_NULL)
+    objects = CopyManager()
 
 
 class PublicOfficial(models.Model):
@@ -87,7 +222,25 @@ class PublicOfficial(models.Model):
     MasterNameID = CFBIntegerField(null=True)
     StdAddressID = CFBNullBooleanField()
     AddressID = CFBNullBooleanField()
+
+    positions = models.ManyToManyField(Position)
+    position_types = models.ManyToManyField(PositionType)
+    # agencies = models.ManyToManyField(Agency)
+
     objects = CopyManager()
+
+    class Meta:
+        ordering = ('POLastName', 'POFirstName')
+
+    @property
+    def display_name(self):
+        middle_initial = ' {}'.format(self.POMI) if not 'NA' else ''
+        return '{}{} {}'.format(self.POFirstName, middle_initial, self.POLastName)
+
+    def gather_positions(self):
+        for position in Position.objects.filter(crossbyreport__PubOffNo=self):
+            self.positions.add(position)
+            self.position_types.add(position.position_type)
 
 
 class EconomicStatement(models.Model):
@@ -106,107 +259,8 @@ class EconomicStatement(models.Model):
     Last_Updated = CFBDateTimeField()
     objects = CopyManager()
 
-
-
-class Agency(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    AgencyNo = CFBIntegerField(primary_key=True)
-    AName = models.CharField(max_length=255, blank=True)
-    AAddress = models.CharField(max_length=100, blank=True)
-    AStreet = models.CharField(max_length=50, blank=True)
-    ACity = models.CharField(max_length=50, blank=True)
-    AState = models.CharField(max_length=15, blank=True)
-    AZip = models.CharField(max_length=25, blank=True)
-    AContact = models.CharField(max_length=100, blank=True)
-    ATelephone = models.CharField(max_length=30, blank=True)
-    AEmail = models.CharField(max_length=75, blank=True)
-    AWebsite = models.CharField(max_length=100, blank=True)
-    SenateConf = models.BooleanField()
-    NeedsConf = models.CharField(max_length=50, blank=True)
-    Statutcite = models.CharField(max_length=50, blank=True)
-    Reporting_Cite = models.CharField(max_length=50, blank=True)
-    Establishment_Cite = models.CharField(max_length=50, blank=True)
-    CertifiedDate = CFBDateField(null=True)
-    Abolished = models.BooleanField()
-    AbolishedDate = CFBDateField(null=True)
-    Authority = models.CharField(max_length=100, blank=True)
-    Appointee = models.CharField(max_length=50, blank=True)
-    ADisplayName = models.CharField(max_length=100, blank=True)
-    HasSubAgency = models.BooleanField()
-    AHas_Attachment = models.BooleanField()
-    AAttachment = models.CharField(max_length=255, blank=True)
-    Memo = models.CharField(max_length=255, blank=True)
-    ASend_InterOffice_Mail = models.BooleanField()
-    Date_Entered = CFBDateTimeField()
-    Last_Updated = CFBDateTimeField()
-    msrepl_tran_version = models.CharField(max_length=40, blank=True)
-    bySeat = models.BooleanField()
-    objects = CopyManager()
-
-
-class SubAgency(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
-    SubAgencyNo = CFBIntegerField(primary_key=True)
-    SubAgencyName = models.CharField(max_length=100, blank=True)
-    SAAddress = models.CharField(max_length=100, blank=True)
-    SAStreet = models.CharField(max_length=50, blank=True)
-    SACity = models.CharField(max_length=50, blank=True)
-    SAState = models.CharField(max_length=15, blank=True)
-    SAZip = models.CharField(max_length=25, blank=True)
-    SAContact = models.CharField(max_length=100, blank=True)
-    SATelephone = models.CharField(max_length=30, blank=True)
-    SAEmail = models.CharField(max_length=75, blank=True)
-    SAWebsite = models.CharField(max_length=100, blank=True)
-    SASenateConf = models.BooleanField()
-    SANeedsConf = CFBNullBooleanField()
-    SAStatutcite = CFBNullBooleanField()
-    SAAbolished = models.BooleanField()
-    SAAbolishedDate = CFBDateField(null=True)
-    SAAuthority = CFBNullBooleanField()
-    SAAppointee = CFBNullBooleanField()
-    Reporting_Cite = models.CharField(max_length=50, blank=True)
-    Establishment_Cite = models.CharField(max_length=50, blank=True)
-    SACertifiedDate = CFBDateField(null=True)
-    SADisplayName = models.CharField(max_length=100, blank=True)
-    SAMemo = models.CharField(max_length=255, blank=True)
-    SAHas_Attachment = models.BooleanField()
-    SAAttachment = models.CharField(max_length=255, blank=True)
-    SASend_InterOffice_Mail = models.BooleanField()
-    Date_Entered = CFBDateTimeField()
-    Last_Updated = CFBDateTimeField()
-    msrepl_tran_version = models.CharField(max_length=40, blank=True)
-    objects = CopyManager()
-
-
-class Position(models.Model):
-    PrimaryRecID = CFBIntegerField()
-    PositionNo = CFBIntegerField(primary_key=True)
-    AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
-    SubAgencyNo = models.ForeignKey(SubAgency, on_delete=models.CASCADE)
-    Title = models.CharField(max_length=150, blank=True)
-    AuthorityNo = CFBIntegerField(null=True)
-    ByPosition = models.BooleanField()
-    ByPositionNo = CFBIntegerField(null=True)
-    ByPositionDesc = models.CharField(max_length=50, blank=True)
-    MayDesignate = models.BooleanField()
-    IsTempTitle = models.BooleanField()
-    Designee_AuthNo = CFBIntegerField(null=True)
-    temp_crossid = CFBIntegerField(null=True)
-    SenateConf = models.BooleanField()
-    NeedsConf = models.CharField(max_length=50, blank=True)
-    Statutcite = models.CharField(max_length=50, blank=True)
-    Reporting_Cite = models.CharField(max_length=50, blank=True)
-    Establishment_Cite = models.CharField(max_length=50, blank=True)
-    CountyID = CFBIntegerField(null=True)
-    CandidateDistrict = models.CharField(max_length=5, blank=True)
-    NumberSlots = CFBIntegerField(null=True)
-    UnlimitedSlots = models.BooleanField()
-    bySeat = models.BooleanField()
-    Date_Entered = CFBDateTimeField()
-    Last_Updated = CFBDateTimeField()
-    msrepl_tran_version = models.CharField(max_length=40, blank=True)
-    objects = CopyManager()
+    class Meta:
+        ordering = ('-ProcessedDate',)
 
 
 class HorseRacingbyReport(models.Model):
@@ -237,6 +291,13 @@ class Professional_ActivitybyReport(models.Model):
     DateStart = CFBDateTimeField()
     DateEnd = CFBDateTimeField(null=True)
     objects = CopyManager()
+
+    def which_roles(self):
+        roles = []
+        for roletype in ['Employee', 'Contractor']:
+            if getattr(self, roletype):
+                roles.append(roletype)
+        return ', '.join(roles)
 
 
 class RealPropertyByReport(models.Model):
@@ -276,6 +337,9 @@ class SecuritiesbyReport(models.Model):
     Date_Entered = CFBDateTimeField()
     objects = CopyManager()
 
+    class Meta:
+        ordering = ('SecurityName',)
+
 
 class SourcesbyReport(models.Model):
     PrimaryRecID = CFBIntegerField()   # No primary key?
@@ -300,6 +364,16 @@ class SourcesbyReport(models.Model):
     DateEnd = CFBDateTimeField(null=True)
     objects = CopyManager()
 
+    class Meta:
+        ordering = ('SourceName',)
+
+    def which_roles(self):
+        roles = []
+        for roletype in ['Director', 'Officer', 'Owner', 'Member', 'Partner', 'Employer', 'Employee', 'Honorarium']:
+            if getattr(self, roletype):
+                roles.append(roletype)
+        return ', '.join(roles)
+
 
 class CrossbyReport(models.Model):
     PrimaryRecID = CFBIntegerField()  # No primary key?
@@ -308,7 +382,7 @@ class CrossbyReport(models.Model):
     DateStart = CFBDateTimeField()
     DateEnd = CFBDateTimeField(null=True)
     AgencyNo = models.ForeignKey(Agency, on_delete=models.CASCADE)
-    SubAgencyNo = models.ForeignKey(SubAgency, on_delete=models.CASCADE)
+    SubAgencyNo = CFBZeroForeignKeyField(SubAgency, null=True, on_delete=models.CASCADE)
     PositionNo = models.ForeignKey(Position, on_delete=models.CASCADE)
     POTitle = models.CharField(max_length=500, blank=True)
     DateReceived = CFBDateTimeField(null=True)
@@ -331,3 +405,6 @@ class CrossbyReport(models.Model):
     Last_Updated = CFBDateTimeField()
     Date_Entered = CFBDateTimeField()
     objects = CopyManager()
+
+    class Meta:
+        ordering = ('-DateReceived',)

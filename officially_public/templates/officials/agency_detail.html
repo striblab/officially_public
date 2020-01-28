@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{object.AName}}</h2>
+
+    <h3>Positions</h3>
+
+    {% for positiontype in object.positiontype_set.all %}
+        <h4>{{ positiontype.title }}</h4>
+        <ul>
+        {% for official in positiontype.publicofficial_set.all %}
+        <li><a href="{% url 'official-detail' official.pk %}">{{ official.display_name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+
+    {% if object.subagency_set.all.count > 0 %}
+    <h3>Subagencies</h3>
+    <ul>
+        {% for subagency in object.subagency_set.all %}
+            <li>{{ subagency.SubAgencyName }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% endblock %}

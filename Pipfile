@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 notebook = "*"
+awscli = "*"
 
 [packages]
 django = "*"
@@ -13,6 +14,7 @@ requests = "*"
 beautifulsoup4 = "*"
 csvkit = "*"
 django-postgres-copy = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"

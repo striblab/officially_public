@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
+from django.views.generic.base import TemplateView
 
 from officials.models import Agency, Position, PublicOfficial
 
@@ -24,3 +25,8 @@ class AgencyDetail(DetailView):
 class PublicOfficialDetail(DetailView):
     context_object_name = 'public-official'
     queryset = PublicOfficial.objects.all()
+
+
+class IndexView(TemplateView):
+
+    template_name = "index.html"

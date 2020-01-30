@@ -129,4 +129,6 @@ dmypy.json
 .pyre/
 
 officially_public/data
+officially_public/settings/local_settings.py
 .DS_Store
+.env.prod
